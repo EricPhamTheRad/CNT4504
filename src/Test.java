@@ -3,21 +3,25 @@ import java.util.Scanner;
 
 public class Test implements Runnable {
     private boolean end = false;
-    private boolean exit = false;
 
     PrintWriter writerer;
-    public Test(PrintWriter writer, boolean exit) {
+    public Test(PrintWriter writer) {
         writerer = writer;
     }
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
         while(!end){
-            if (scanner.next().contains("1")){
+            String input = scanner.next();
+            if (input.contains("1")){
                 end = true;
-                exit = true;
                 writerer.println("1");
             }
+            else if(input.equals("requesting")){
+                writerer.println("requesting");
+            }
         }
+        System.out.println("Thread Ended");
+        scanner.close();
     }
 }
