@@ -1,42 +1,61 @@
 import java.io.*;
 import java.net.*;
 //import java.util.Date;
-import java.util.Scanner;  // For reading user input
 public class Server {
     public static void main(String[] args) {
         //Create socket for server at port 2222
         boolean exit = false;
+        System.out.println("Server is listening on port 2222");
         try (ServerSocket serverSocket = new ServerSocket(2222)) {
-            System.out.println("Server is listening on port 2222");
             //waits for client to connect
             Socket socket = serverSocket.accept();
+            System.out.println("Connected");
             //set up way to send data to client
+            BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            String data;
 
-            //code to allowing user to terminate client and server, uncomment to activate
-            //Runnable r  = new Test(writer,exit);
-            //new Thread(r).start();
-
-            //main while loop
+            if(!socket.isClosed()){
+                System.out.println("Socket Open");
+            }
             while(!exit) {
                 //Read data from  to client
-                //BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                //String data = receive.readLine();
-                //System.out.println(data);
-
                 //sets up stream to send data
                 //send text
-                writer.println("This message was sent from the server");
-
-                //wait 1 second
-                Thread.sleep(500);
+                if (receive.ready()) {
+                    data = receive.readLine();
+                    int selection = Integer.parseInt(data);
+                    switch (selection) {
+                        case 1:
+                            writer.println("Data and Time");
+                        case 2:
+                            writer.println("Uptime");
+                        case 3:
+                            writer.println("Memory Use");
+                        case 4:
+                            writer.println("Netstat");
+                        case 5:
+                            writer.println("Current User");
+                        case 6:
+                            writer.println("Running Process");
+                        default:
+                            writer.println("Invalid request");
+                    }
+                    //wait 1 second
+                    Thread.sleep(500);
+                }
+                if (socket.isClosed()) {
+                    System.out.println("Socket Closed");
+                    exit = true;
+                }
             }
+
             socket.close();
+
         } catch (IOException e){
             System.out.println("Server Exception: " + e.getMessage());
-            e.printStackTrace();
-       } catch (InterruptedException e) {
-           throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
     }
