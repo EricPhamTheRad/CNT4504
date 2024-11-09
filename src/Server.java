@@ -25,21 +25,29 @@ public class Server {
                 if (receive.ready()) {
                     data = receive.readLine();
                     int selection = Integer.parseInt(data);
+                    System.out.println(data);
                     switch (selection) {
                         case 1:
                             writer.println("Data and Time");
+                            break;
                         case 2:
                             writer.println("Uptime");
+                            break;
                         case 3:
                             writer.println("Memory Use");
+                            break;
                         case 4:
                             writer.println("Netstat");
+                            break;
                         case 5:
                             writer.println("Current User");
+                            break;
                         case 6:
                             writer.println("Running Process");
+                            break;
                         default:
                             writer.println("Invalid request");
+                            break;
                     }
                     //wait 1 second
                     Thread.sleep(500);
