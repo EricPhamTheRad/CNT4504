@@ -20,7 +20,7 @@ public class Client implements Runnable {
 
                 while (!exit) {
                     String input = MultiClient.getCurrentInput();
-                    System.out.println("Client sending input: " + input);
+                    //System.out.println("Client sending input: " + input);
 
                     if ("7".equals(input)) {
                         writer.println("stop");
@@ -34,7 +34,7 @@ public class Client implements Runnable {
                         if (serverResponse.equals("stop")) {
                             break;
                         }
-                        System.out.println("Server Response: " + serverResponse);
+                        System.out.println(serverResponse);
                     }
                     MultiClient.notifyServerResponse();
                 }
