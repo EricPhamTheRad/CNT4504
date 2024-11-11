@@ -58,5 +58,15 @@ public class Client implements Runnable {
             }
         }
     }
+
+    public static void main(String[] args) {
+
+        String serverIP = "139.62.210.155";
+        int port = 2222;
+
+        // Start the client
+        Client client = new Client(serverIP, port);
+        new Thread(client).start();
+    }
 }
 
