@@ -1,57 +1,54 @@
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
-public class Client {
-    public static void main(String[] args) throws InterruptedException {
-        //use to terminate program
-        boolean exit = false;
-        boolean stop;
-        Scanner scanner = new Scanner(System.in);
-        String input;
+public class Client implements Runnable {
+    private final String ipAddress;
+    private final int port;
+    private boolean exit = false;
+
+    public Client(String ipAddress, int port) {
+        this.ipAddress = ipAddress;
+        this.port = port;
+    }
+
+    public void run() {
         while (!exit) {
-            //try to access server at IP and socket
-            try (Socket socket = new Socket("139.62.210.155", 2222)) {
-                //Sets up reading the socket if sucsessful
-                System.out.println("Connected");
+            try (Socket socket = new Socket(ipAddress, port)) {
+                System.out.println("Connected to server");
                 BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-                //code to terminate program remotely un comment to activate
-                while (!exit) {
-                    //read data sent from server
-                    input = scanner.nextLine();
-                    if(Integer.parseInt(input) <= 7){
-                        stop = false;
-                        System.out.println("You inputted: "+input);
-                        writer.println(input);
-                        while(!stop) {
-                            if (input.equals("7")) {
-                                exit = true;
-                                stop = true;
-                            }
-                            String serverResp = receive.readLine();
-                            System.out.println(serverResp);
-                            if (serverResp.equals("stop")){
-                                stop = true;
 
-                            }
-                        }
-                        System.out.println("You have exited the loop");
+                while (!exit) {
+                    String input = MultiClient.getCurrentInput();
+                    System.out.println("Client sending input: " + input);
+
+                    if ("7".equals(input)) {
+                        writer.println("stop");
+                        exit = true;
+                        break;
+                    } else {
+                        writer.println(input);
                     }
+                    String serverResponse;
+                    while ((serverResponse = receive.readLine()) != null) {
+                        if (serverResponse.equals("stop")) {
+                            break;
+                        }
+                        System.out.println("Server Response: " + serverResponse);
+                    }
+                    MultiClient.notifyServerResponse();
                 }
                 writer.println("closed");
-                writer.close();
-                receive.close();
-            } catch (UnknownHostException ex) {
-
-                System.out.println("Server not found: " + ex.getMessage());
-
-            } catch (IOException ex) {
-
-                System.out.println("I/O error: " + ex.getMessage());
+            } catch (IOException e) {
+                System.out.println("Connection error: " + e.getMessage());
             }
-            Thread.sleep(1000);
-        }
 
+            try {
+                Thread.sleep(1000); // Delay before retrying connection
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
+
