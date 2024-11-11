@@ -5,7 +5,7 @@ public class Server {
     public static void main(String[] args) {
 
         //create socket for server at port ""
-        int port = 3311;
+        int port = 4351;
         System.out.println("Server is listening on port: " + port);
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
@@ -44,28 +44,22 @@ public class Server {
             //command execution based on user input
             switch (selection) {
                 case 1:
-                    writer.println(executeCommand("date"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer, "date");
                     break;
                 case 2:
-                    writer.println(executeCommand("uptime"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer, "uptime");
                     break;
                 case 3:
-                    writer.println(executeCommand("free -m"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer, "free -m");
                     break;
                 case 4:
-                    writer.println(executeCommand("netstat"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer,"netstat");
                     break;
                 case 5:
-                    writer.println(executeCommand("who"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer,"who");
                     break;
                 case 6:
-                    writer.println(executeCommand("ps -aux"));
-                    writer.println("stop");
+                    executeAndSendCommand(writer,"ps -aux");
                     break;
                 default:
                     writer.println("Invalid request. Please enter a number between 1 and 6.");
@@ -81,27 +75,30 @@ public class Server {
     }
 
     //method to execute the system commands and return output as String
-    private static String executeCommand(String command) {
-        StringBuilder output = new StringBuilder();
+    private static void executeAndSendCommand(PrintWriter writer, String command) {
+        //StringBuilder output = new StringBuilder();
         try{
             Process process = Runtime.getRuntime().exec(command);
+
+            //read the command input
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
             //read the input
             String line;
             while ((line = input.readLine()) != null){
-                output.append(line).append("\n");
+                writer.println(line);
             }
 
-            //read all the errors in case there are
+            //read any errors
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             while((line = error.readLine()) != null){
-                output.append("Error").append(line).append("\n");
+                writer.println("Error: " + line);
             }
         } catch (IOException e) {
-            output.append("Command execution error: ").append(e.getMessage()).append("\n");
+            writer.println("Command execution error: " + e.getMessage());
+        }finally {
+            writer.println("stop");
         }
-        return output.toString();
     }
 }
 

@@ -97,7 +97,7 @@ public class Client implements Runnable {
             System.out.println("Client " + clientId + " connection error: " + e.getMessage());
         }
     }
-
+    /*
     public static void main(String[] args) {
         String ipAddress = "139.62.210.155";
         int port = 3311;
@@ -107,7 +107,7 @@ public class Client implements Runnable {
         Client client = new Client(ipAddress, port, operation, 1);
         new Thread(client).start();
     }
-
+    */
     // Synchronized method to safely update total turnaround time
     private static synchronized void addToTotalTurnaroundTime(long turnaroundTime) {
         totalTurnaroundTime += turnaroundTime;
