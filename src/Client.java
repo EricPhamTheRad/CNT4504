@@ -22,11 +22,13 @@ public class Client implements Runnable {
                     String input = MultiClient.getCurrentInput();
                     //System.out.println("Client sending input: " + input);
 
+                    long startTime;
                     if ("7".equals(input)) {
                         writer.println("stop");
                         exit = true;
                         break;
                     } else {
+                        startTime = System.currentTimeMillis();
                         writer.println(input);
                     }
                     String serverResponse;
@@ -36,6 +38,8 @@ public class Client implements Runnable {
                         }
                         System.out.println(serverResponse);
                     }
+                    long endTime = System.currentTimeMillis();
+                    System.out.println(endTime - startTime + "ms");
                     MultiClient.notifyServerResponse();
                 }
                 writer.println("closed");
