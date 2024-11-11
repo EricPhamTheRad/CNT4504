@@ -16,9 +16,25 @@ public class MultiClient {
         int port = scanner.nextInt();
         scanner.nextLine(); // Consume newline
         System.out.println("IP Address: " + ipAddress + " Port: " + port);
+        /*
+         Failed multiclient code.
+        System.out.print("Enter the number of clients: ");
+        int clientNumber = scanner.nextInt();
+        List<Client> clients = new ArrayList<>();
+        List<Thread> clientThreads = new ArrayList<>();
+        for (int i = 0; i < clientNumber; i++) {
+            Client client = new Client("139.62.210.155", 2222, i);
+            clients.add(client);
+            Thread thread = new Thread(client, "" + i);
+            clientThreads.add(thread);
+        }
+
+         */
 
         // Start Client thread
-        Runnable client = new Client("139.62.210.155", 2222);
+        //Runnable client = new Client("139.62.210.155", 2222);
+        Runnable client = new Client(ipAddress, port);
+
         Thread clientThread1 = new Thread(client, "1");
         clientThread1.start();
 
