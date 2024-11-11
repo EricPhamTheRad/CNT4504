@@ -27,7 +27,13 @@ public class MultiClient {
             synchronized (lock) {
                 // Wait for the client to consume the previous input
                 printInputRequest();
-                currentInput = scanner.nextLine();
+                boolean stop = false;
+                while(!stop) {
+                    currentInput = scanner.nextLine();
+                    if (isNumber(currentInput)){
+                        stop = true;
+                    }
+                }
                 lock.notifyAll(); // Notify Client thread of new input
 
                 while (!serverResponded) {
@@ -76,6 +82,14 @@ public class MultiClient {
         synchronized (lock) {
             serverResponded = true;
             lock.notifyAll(); // Wake up the main thread
+        }
+    }
+    public static boolean isNumber(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }
