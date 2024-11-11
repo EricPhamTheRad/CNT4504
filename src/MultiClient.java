@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MultiClient {
     private static volatile String currentInput; // Shared input variable
@@ -15,9 +17,17 @@ public class MultiClient {
         System.out.println("Please input Port:");
         int port = scanner.nextInt();
         scanner.nextLine(); // Consume newline
-        System.out.println("IP Address: " + ipAddress + " Port: " + port);
+
+        //prompt for the number of clients
+        System.out.println("Please input number of clients: ");
+        int numClients = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
         /*
-         Failed multiclient code.
+
+        System.out.println("IP Address: " + ipAddress + " Port: " + port);
+
+        Failed multi client code.
         System.out.print("Enter the number of clients: ");
         int clientNumber = scanner.nextInt();
         List<Client> clients = new ArrayList<>();
@@ -29,7 +39,7 @@ public class MultiClient {
             clientThreads.add(thread);
         }
 
-         */
+
 
         // Start Client thread
         //Runnable client = new Client("139.62.210.155", 2222);
@@ -37,24 +47,28 @@ public class MultiClient {
 
         Thread clientThread1 = new Thread(client, "1");
         clientThread1.start();
+        */
+
+        //create and start threads
+        List<Thread> clients = new ArrayList<>();
+        for (int i = 0; i < numClients; i++) {
+            Client client = new Client(ipAddress, port);
+            Thread clienThread = new Thread(client, "Client-" + i);
+            clients.add(clienThread);
+            clienThread.start();
+        }
 
         // Main input loop
         while (!exit) {
             synchronized (lock) {
                 // Wait for the client to consume the previous input
                 printInputRequest();
-                boolean stop = false;
-                while(!stop) {
-                    currentInput = scanner.nextLine();
-                    if (isNumber(currentInput)){
-                        stop = true;
-                    }
-                }
-                lock.notifyAll(); // Notify Client thread of new input
+                currentInput = scanner.nextLine();
+                lock.notifyAll(); // Notify all client threads of a new input
 
-                while (!serverResponded) {
-                    try {
-                        lock.wait(); // Wait until the client has responded
+                while(!serverResponded) {
+                    try{
+                        lock.wait(); // Wait until clients have responded
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
@@ -66,17 +80,11 @@ public class MultiClient {
             }
         }
 
+        scanner.close();
     }
 
     public static String getCurrentInput() {
         synchronized (lock) {
-            while (currentInput == null) { // Check if there's new input
-                try {
-                    lock.wait(); // Wait for new input
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
             String input = currentInput;
             currentInput = null; // Reset for next input
             return input;
