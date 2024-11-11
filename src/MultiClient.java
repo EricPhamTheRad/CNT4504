@@ -3,10 +3,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MultiClient {
+    /*
     private static volatile String currentInput; // Shared input variable
     private static final Object lock = new Object(); // Lock for synchronizing input access
     private static boolean exit = false;
     private static volatile boolean serverResponded = false; // Flag to control prompt timing
+    */
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -15,14 +17,12 @@ public class MultiClient {
         System.out.println("Please input IP address:");
         String ipAddress = scanner.nextLine();
         System.out.println("Please input Port:");
-        int port = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        int port = Integer.parseInt(scanner.nextLine());
+        //scanner.nextLine(); // Consume newline
 
         //prompt for the number of clients
-        System.out.println("Please input number of clients: ");
-        int numClients = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-
+        System.out.println("Please input number of clients (1, 5, 10, 15, 20, 25): ");
+        int numClients = Integer.parseInt(scanner.nextLine());
         /*
 
         System.out.println("IP Address: " + ipAddress + " Port: " + port);
@@ -49,16 +49,46 @@ public class MultiClient {
         clientThread1.start();
         */
 
+        printInputRequest();
+        String operation = scanner.nextLine();
+        //validate operation input
+        while (!isValidOperation(operation)) {
+            System.out.println("Invalid input. Please enter a number between 1 and 6.");
+            printInputRequest();
+            operation = scanner.nextLine();
+        }
+
         //create and start threads
         List<Thread> clients = new ArrayList<>();
         for (int i = 0; i < numClients; i++) {
-            Client client = new Client(ipAddress, port);
-            Thread clienThread = new Thread(client, "Client-" + i);
+            Client client = new Client(ipAddress, port, operation, i +1);
+            Thread clienThread = new Thread(client);
             clients.add(clienThread);
             clienThread.start();
         }
 
-        // Main input loop
+        // Wait for all client threads to finish
+        for (Thread thread : clients) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                System.out.println("Thread interrupted: " + e.getMessage());
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        //after all clients have finished, calculate total and average turnaround times
+        long totalTurnaroundTime = Client.getTotalTurnaroundTime();
+        double averageTurnaroundTime = totalTurnaroundTime / (double) numClients;
+
+        System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime + " ms");
+        System.out.println("Average Turnaround Time: " + averageTurnaroundTime + " ms");
+
+        scanner.close();
+    }
+
+    /*
+    // Main input loop
         while (!exit) {
             synchronized (lock) {
                 // Wait for the client to consume the previous input
@@ -83,6 +113,8 @@ public class MultiClient {
         scanner.close();
     }
 
+
+
     public static String getCurrentInput() {
         synchronized (lock) {
             String input = currentInput;
@@ -90,6 +122,7 @@ public class MultiClient {
             return input;
         }
     }
+    */
 
     private static void printInputRequest() {
         System.out.println("Type a number to select a request: ");
@@ -99,8 +132,9 @@ public class MultiClient {
         System.out.println("4: Netstat");
         System.out.println("5: Current Users on the Server");
         System.out.println("6: Running Processes");
-        System.out.println("7: End session");
     }
+
+    /*
     // Method to be called by Client after it finishes printing the server response
     public static void notifyServerResponse() {
         synchronized (lock) {
@@ -116,4 +150,16 @@ public class MultiClient {
             return false;
         }
     }
+
+     */
+
+    private static boolean isValidOperation(String input) {
+        try {
+            int op = Integer.parseInt(input);
+            return op >= 1 && op <= 6;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
+
