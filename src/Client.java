@@ -6,6 +6,7 @@ public class Client {
     public static void main(String[] args) throws InterruptedException {
         //use to terminate program
         boolean exit = false;
+        boolean stop;
         Scanner scanner = new Scanner(System.in);
         String input;
         while (!exit) {
@@ -19,11 +20,24 @@ public class Client {
                 while (!exit) {
                     //read data sent from server
                     input = scanner.nextLine();
-                    writer.println(input);
-                    if(input.contains("end")){
-                        exit = true;
+                    if(Integer.parseInt(input) <= 7){
+                        stop = false;
+                        System.out.println("You inputted: "+input);
+                        writer.println(input);
+                        while(!stop) {
+                            if (input.equals("7")) {
+                                exit = true;
+                                stop = true;
+                            }
+                            String serverResp = receive.readLine();
+                            System.out.println(serverResp);
+                            if (serverResp.equals("stop")){
+                                stop = true;
+
+                            }
+                        }
+                        System.out.println("You have exited the loop");
                     }
-                    System.out.println(receive.readLine());
                 }
                 writer.println("closed");
                 writer.close();
