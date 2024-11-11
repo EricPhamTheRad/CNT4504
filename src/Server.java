@@ -28,25 +28,34 @@ public class Server {
                     System.out.println(data);
                     switch (selection) {
                         case 1:
-                            writer.println("Data and Time");
+                            for(int i=0; i<10;i++) {
+                                writer.println("Data and Time");
+                            }
+                            writer.println("stop");
                             break;
                         case 2:
                             writer.println("Uptime");
+                            writer.println("stop");
                             break;
                         case 3:
                             writer.println("Memory Use");
+                            writer.println("stop");
                             break;
                         case 4:
                             writer.println("Netstat");
+                            writer.println("stop");
                             break;
                         case 5:
                             writer.println("Current User");
+                            writer.println("stop");
                             break;
                         case 6:
                             writer.println("Running Process");
+                            writer.println("stop");
                             break;
                         default:
                             writer.println("Invalid request");
+                            writer.println("stop");
                             break;
                     }
                     //wait 1 second
