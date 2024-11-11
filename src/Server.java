@@ -22,48 +22,52 @@ public class Server {
                 //Read data from  to client
                 //sets up stream to send data
                 //send text
-                if (receive.ready()) {
+                if (receive.ready() ) {
+                    //System.out.println("I about to read data");
                     data = receive.readLine();
-                    int selection = Integer.parseInt(data);
-                    System.out.println(data);
-                    switch (selection) {
-                        case 1:
-                            for(int i=0; i<10;i++) {
-                                writer.println("Data and Time");
-                            }
-                            writer.println("stop");
-                            break;
-                        case 2:
-                            writer.println("Uptime");
-                            writer.println("stop");
-                            break;
-                        case 3:
-                            writer.println("Memory Use");
-                            writer.println("stop");
-                            break;
-                        case 4:
-                            writer.println("Netstat");
-                            writer.println("stop");
-                            break;
-                        case 5:
-                            writer.println("Current User");
-                            writer.println("stop");
-                            break;
-                        case 6:
-                            writer.println("Running Process");
-                            writer.println("stop");
-                            break;
-                        default:
-                            writer.println("Invalid request");
-                            writer.println("stop");
-                            break;
+
+                    if (!data.isEmpty()) {
+                        int selection = Integer.parseInt(data);
+                        System.out.println(data);
+                        switch (selection) {
+                            case 1:
+                                for (int i = 0; i < 10; i++) {
+                                    writer.println("Data and Time");
+                                }
+                                writer.println("stop");
+                                break;
+                            case 2:
+                                writer.println("Uptime");
+                                writer.println("stop");
+                                break;
+                            case 3:
+                                writer.println("Memory Use");
+                                writer.println("stop");
+                                break;
+                            case 4:
+                                writer.println("Netstat");
+                                writer.println("stop");
+                                break;
+                            case 5:
+                                writer.println("Current User");
+                                writer.println("stop");
+                                break;
+                            case 6:
+                                writer.println("Running Process");
+                                writer.println("stop");
+                                break;
+                            default:
+                                writer.println("Invalid request");
+                                writer.println("stop");
+                                break;
+                        }
+                        //wait 1 second
+                        Thread.sleep(500);
                     }
-                    //wait 1 second
-                    Thread.sleep(500);
-                }
-                if (socket.isClosed()) {
-                    System.out.println("Socket Closed");
-                    exit = true;
+                    if (socket.isClosed()) {
+                        System.out.println("Socket Closed");
+                        exit = true;
+                    }
                 }
             }
 
@@ -74,7 +78,6 @@ public class Server {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
 
