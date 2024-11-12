@@ -1,23 +1,17 @@
 import java.io.*;
 import java.net.*;
-//import java.util.Date;
+
 public class Server {
     public static void main(String[] args) {
-
-        //create socket for server at port ""
-        int port = 4351;
+        int port = 4351; //server port
         System.out.println("Server is listening on port: " + port);
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            //waits for client to connect
-            while(true) {
-                //waits for client to connect
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Connected to client");
 
-                //handle client in a separate thread (if you want to handle multiple clients concurrently)
-                //for an iterative server, we handle one client at a time in this loop
-                handleClient(socket);
+                handleClient(socket); //handle each client in an iterative manner
             }
         } catch (IOException e) {
             System.out.println("Server Exception: " + e.getMessage());
@@ -39,8 +33,6 @@ public class Server {
                 return;
             }
 
-            System.out.println("Received request: " + data);
-
             //command execution based on user input
             switch (selection) {
                 case 1:
@@ -53,52 +45,43 @@ public class Server {
                     executeAndSendCommand(writer, "free -m");
                     break;
                 case 4:
-                    executeAndSendCommand(writer,"netstat");
+                    executeAndSendCommand(writer, "netstat");
                     break;
                 case 5:
-                    executeAndSendCommand(writer,"who");
+                    executeAndSendCommand(writer, "who");
                     break;
                 case 6:
-                    executeAndSendCommand(writer,"ps -aux");
+                    executeAndSendCommand(writer, "ps -aux");
                     break;
                 default:
                     writer.println("Invalid request. Please enter a number between 1 and 6.");
                     writer.println("stop");
                     break;
             }
-
-            //close the socket after handling the client
-            socket.close();
+            socket.close(); //close the client connection after handling the request
         } catch (IOException e) {
             System.out.println("Server Exception: " + e.getMessage());
         }
     }
 
-    //method to execute the system commands and return output as String
     private static void executeAndSendCommand(PrintWriter writer, String command) {
-        //StringBuilder output = new StringBuilder();
-        try{
+        try {
             Process process = Runtime.getRuntime().exec(command);
 
-            //read the command input
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            //read the input
             String line;
-            while ((line = input.readLine()) != null){
+            while ((line = input.readLine()) != null) {
                 writer.println(line);
             }
 
-            //read any errors
             BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while((line = error.readLine()) != null){
+            while ((line = error.readLine()) != null) {
                 writer.println("Error: " + line);
             }
         } catch (IOException e) {
             writer.println("Command execution error: " + e.getMessage());
-        }finally {
-            writer.println("stop");
+        } finally {
+            writer.println("stop"); //indicate end of response
         }
     }
 }
-
