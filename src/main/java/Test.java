@@ -13,11 +13,11 @@ public class Test implements Runnable {
         Scanner scanner = new Scanner(System.in);
         while(!end){
             String input = scanner.next();
-            if (input.contains("1")){
+            if (input.contains("end")){
                 end = true;
-                writerer.println("1");
+                writerer.println("end");
             }
-            else if(input.equals("requesting")){
+            else if(input.equals("request")){
                 writerer.println("requesting");
             }
         }
