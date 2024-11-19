@@ -1,12 +1,12 @@
 import java.io.PrintWriter;
 import java.util.Scanner;
 
-public class Test implements Runnable {
+public class TerminalWriter implements Runnable {
     private boolean end = false;
 
-    PrintWriter writerer;
-    public Test(PrintWriter writer) {
-        writerer = writer;
+    PrintWriter writer;
+    public TerminalWriter(PrintWriter writer) {
+        this.writer = writer;
     }
 
     public void run() {
@@ -15,10 +15,16 @@ public class Test implements Runnable {
             String input = scanner.next();
             if (input.contains("end")){
                 end = true;
-                writerer.println("end");
+                writer.println("end");
             }
             else if(input.equals("request")){
-                writerer.println("requesting");
+                writer.println("requesting");
+            }
+            writer.println("requesting");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
         System.out.println("Thread Ended");

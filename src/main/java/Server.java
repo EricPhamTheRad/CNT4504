@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.*;
-//import java.util.Date;
-//import java.util.Scanner;  // For reading user input
+// For reading user input
 public class Server {
     public static void main(String[] args) throws UnknownHostException {
         //Create socket for server at port 2222
@@ -17,29 +16,39 @@ public class Server {
             BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
 
-            //code to allowing user to terminate client and server, uncomment to activate
-            Runnable r  = new Test(writer);
-            new Thread(r).start();
+            //TerminalWriter to allowing user to type in terminal and read the terminal at the same time
+            //May not be need in the future
+            //Uses multithreading to accomplished
+            //Runnable r  = new TerminalWriter(writer);
+            //new Thread(r).start();
 
-            //main while loop
-            //AHHH
+            //Checks if the connection is made
+            //TODO: create code to wait for multiple clients to connect and wait for the user to start collection
+            //TODO: Create GUI, lot of work for the future, more important to get data collection and transmission working
             if(!socket.isClosed()){
                 System.out.println("Socket Open");
             }
+
+            //main while loop
             while(!exit) {
-                //Read data from  to client
-                //sets up stream to send data
-                //send text
+                //Currently uses manual typing to request data
+                //TODO: uses loop to send request and wait for data to be receive
                 if(socket.isClosed()){
                     System.out.println("Socket Closed");
                 }
-                //What
                 //wait 1 second
-                Thread.sleep(500);
+                System.out.println("requesting data");
+                writer.println("requesting");
+                Thread.sleep(1000);
+                //Read terminal for string data
                 data = receive.readLine();
+                //checks if Client closed
                 if(data.equals("closed")){
                     exit = true;
                 }
+                //Prints what is received
+                //TODO: Put data into objects for GUI
+                //TODO: Setup data storage in CSV or other file type
                 else {
                     System.out.print("Data received: ");
                     System.out.println(data);
@@ -47,7 +56,7 @@ public class Server {
             }
 
             socket.close();
-
+           //Error handling
         } catch (IOException e){
             System.out.println("Server Exception: " + e.getMessage());
        } catch (InterruptedException e) {

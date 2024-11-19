@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Main-Class: Client
+Class-Path: pi4j-plugin-gpiod-2.7.0.jar pi4j-library-pigpio-2.7.0.jar pi
+ 4j-library-gpiod-2.7.0.jar slf4j-api-2.0.16.jar pi4j-core-2.7.0.jar pi4
+ j-plugin-raspberrypi-2.7.0.jar pi4j-plugin-pigpio-2.7.0.jar slf4j-simpl
+ e-2.0.16.jar
+

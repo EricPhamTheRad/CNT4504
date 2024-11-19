@@ -13,11 +13,9 @@ import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
 
 public class Client {
     public static void main(String[] args) throws InterruptedException {
-
-
         //use to terminate program
         boolean exit = false;
-
+        //Configures SPI for the Raspberry PI
         var piGpio = PiGpio.newNativeInstance();
         var pi4j = Pi4J.newContextBuilder()
                 .noAutoDetect()
@@ -25,42 +23,62 @@ public class Client {
                         PiGpioSpiProvider.newInstance(piGpio)
                 )
                 .build();
-
+        //Selects Pin 8 for the Chip select
         SpiChipSelect chipSelect = SpiChipSelect.CS_0;
+        //Creates buss for the SPI
         SpiBus spiBus = SpiBus.BUS_0;
-
+        //Creates the object to handles SPI communication and reading of acceleration from LIS3DH
         LIS3DH test = new LIS3DH(pi4j, spiBus, chipSelect);
+        //To Do: Set up class and object for SPI communication for ADC value from MCP3008
 
-
+        //Main loop, should exit when
         while (!exit) {
             //try to access server at IP and socket
             System.out.println("Attempting to Connect");
-
-            System.out.println("10.253.5.167");
-            try (Socket socket = new Socket("10.253.5.167", 2222)) {
+            //System.out.println("10.253.5.167");
+            System.out.println("192.168.1.74");
+            //Currently have to update IP address uses if change location or the router reassigns
+            //For Final version use Braindrip's main computer static IP address.
+            try (Socket socket = new Socket("192.168.1.74", 2222)) {
                 //Sets up reading the socket if successful
                 System.out.println("Connected");
+                //
                 BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
                 //code to terminate program remotely un comment to activate
-
+                String data;
+                float[] values;
+                //Loop current in
                 while (!exit) {
                     //read data sent
-                    //if(test.isDataReady()) {
-                    test.isDataReady();
-                        test.readAccelerometerData();
-                    //}
-                    //String data = receive.readLine();
-                    //Help
-                    //if (data.contains("end")) {
-                     //   exit = true;
-                    //}
-                    //else if(data.equals("requesting")){
-                        //System.out.println("request received, sending data");
-                        //writer.println("2048");
-                    //}
+                    data = receive.readLine();
+                    //Checks if the server wants to end data collection
+                    if (data.contains("end")) {
+                        exit = true;
+                    }
+                    //if the server request data polls for Acceleration data and ADC in the future
+                    if(data.equals("requesting")){
+                        System.out.println("request received, sending data");
+                        //Checks if Acceleration data is ready, here to test function, will move to the class file
+                        /*
+                        if(test.isDataReady()){
+                            System.out.println("data ready works!");
+                        }
+                        */
+                        //Polls data, currently only prints to client terminal for testing function
+                        values = test.readAccelerometerData();
+
+                        //Send dummy data
+                        writer.printf("X: %.2f, Y: %.2f, Z: %.2f%n",values[0],values[1],values[2]);
+                    }
+                    //slow loop for readability
+                    //values = test.readAccelerometerData();
+
+                    //Send dummy data
+                    //writer.printf("X: %.2f, Y: %.2f, Z: %.2f%n", values[0],values[1], values[2]);
                     Thread.sleep(1000);
                 }
+                //closes client
                 writer.println("closed");
                 writer.close();
                 receive.close();
@@ -72,10 +90,8 @@ public class Client {
 
                 System.out.println("I/O error: " + ex.getMessage());
             }
+            //Checks every second for the server to open
             Thread.sleep(1000);
         }
-
     }
-
-
 }
