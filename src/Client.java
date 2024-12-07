@@ -1,61 +1,42 @@
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
-public class Client implements Runnable {
-    private final String ipAddress;
-    private final int port;
-    private final String operation;
-    private final int clientId;
-    private static long totalTurnaroundTime = 0;
+public class Client {
+    private Socket socket; //socket instance for communication
+    private int clientId; //unique client id
+    private int requestType; //type of request
 
-    public Client(String ipAddress, int port, String operation, int clientId) {
-        this.ipAddress = ipAddress;
-        this.port = port;
-        this.operation = operation;
-        this.clientId = clientId;
+    public Client(Socket socket, int clientId, int requestType) {
+        this.socket = socket; //initialize socket
+        this.clientId = clientId; //initialize client id
+        this.requestType = requestType; //initialize request type
     }
 
-    @Override
-    public void run() {
-        try (Socket socket = new Socket(ipAddress, port);
-             BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+    public long runClient() {
+        long turnaroundTime = 0; //initialize turnaround time
 
-            System.out.println("Client " + clientId + " connected to server.");
+        try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            long startTime = System.currentTimeMillis();
-            writer.println(operation); //send operation to server
+            System.out.println("client " + clientId + " connected to server."); //log connection
 
-            //collect server response
-            StringBuilder response = new StringBuilder();
-            String serverResponse;
-            while ((serverResponse = receive.readLine()) != null) {
-                if ("stop".equalsIgnoreCase(serverResponse)) {
-                    break;
-                }
-                response.append(serverResponse).append("\n");
+            long startTime = System.currentTimeMillis(); //record start time
+
+            out.println(requestType); //send request to server
+
+            String response; //variable to store response
+            System.out.println("client " + clientId + " received response:"); //log response reception
+            while ((response = in.readLine()) != null) { //read response
+                System.out.println(response); //print response
             }
 
-            long endTime = System.currentTimeMillis();
-            long turnaroundTime = endTime - startTime;
-
-            //update total turnaround time safely
-            addToTotalTurnaroundTime(turnaroundTime);
-
-            //display client-specific response and time
-            System.out.println("Client " + clientId + " received response:\n" + response);
-            System.out.println("Client " + clientId + " Turnaround Time: " + turnaroundTime + " ms");
+            long endTime = System.currentTimeMillis(); //record end time
+            turnaroundTime = endTime - startTime; //calculate turnaround time
 
         } catch (IOException e) {
-            System.out.println("Client " + clientId + " connection error: " + e.getMessage());
+            System.out.println("error with client " + clientId + ": " + e.getMessage()); //log error
         }
-    }
 
-    private static synchronized void addToTotalTurnaroundTime(long turnaroundTime) {
-        totalTurnaroundTime += turnaroundTime;
-    }
-
-    public static long getTotalTurnaroundTime() {
-        return totalTurnaroundTime;
+        return turnaroundTime; //return turnaround time
     }
 }

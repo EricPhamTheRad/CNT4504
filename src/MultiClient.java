@@ -1,83 +1,68 @@
+import java.io.IOException;
+import java.net.Socket;
 import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
 
 public class MultiClient {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Please Input IP Address:"); //prompt for server ip
+            String ipAddress = scanner.nextLine(); //read server ip
 
-        //get server details
-        System.out.println("Please input IP address:");
-        String ipAddress = scanner.nextLine();
-        System.out.println("Please input Port:");
-        int port = Integer.parseInt(scanner.nextLine());
+            System.out.println("please input port:"); //prompt for server port
+            int port = scanner.nextInt(); //read server port
 
-        //prompt for number of clients
-        System.out.println("Please input number of clients (1, 5, 10, 15, 20, 25): ");
-        int numClients = Integer.parseInt(scanner.nextLine());
-
-        while (true) {
-            printInputRequest();
-            String operation = scanner.nextLine();
-
-            if ("0".equals(operation)) {
-                System.out.println("Exiting program.");
-                break;
-            }
-
-            //validate operation input
-            while (!isValidOperation(operation)) {
-                System.out.println("Invalid input. Please enter a number between 1 and 6.");
-                printInputRequest();
-                operation = scanner.nextLine();
-            }
-
-            //create and start threads
-            List<Thread> clients = new ArrayList<>();
-            for (int i = 0; i < numClients; i++) {
-                Client client = new Client(ipAddress, port, operation, i + 1);
-                Thread clientThread = new Thread(client);
-                clients.add(clientThread);
-                clientThread.start();
-            }
-
-            //wait for all client threads to finish
-            for (Thread thread : clients) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    System.out.println("Thread interrupted: " + e.getMessage());
-                    Thread.currentThread().interrupt();
+            int numClients;
+            while (true) {
+                System.out.println("Please Input Number of Clients (1, 5, 10, 15, 20, 25, 100)::"); //prompt for number of clients
+                numClients = scanner.nextInt(); //read client count
+                if (numClients >= 1 && numClients <= 100) {
+                    break; //exit loop if valid input
                 }
+                System.out.println("invalid number of cleints. enter a number between 1 and 100."); //handle invalid input
             }
 
-            //display total and average turnaround times
-            long totalTurnaroundTime = Client.getTotalTurnaroundTime();
-            double averageTurnaroundTime = totalTurnaroundTime / (double) numClients;
-            System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime + " ms");
-            System.out.println("Average Turnaround Time: " + averageTurnaroundTime + " ms");
-        }
+            long[] turnaroundTimes = new long[numClients]; //array to store turnaround times
 
-        scanner.close();
-    }
+            for (int i = 0; i < numClients; i++) {
+                final int clientId = i + 1; //assign client id
 
-    private static void printInputRequest() {
-        System.out.println("Type a number to select a request: ");
-        System.out.println("1: Date and Time on Server");
-        System.out.println("2: Server Uptime");
-        System.out.println("3: Server Memory Usage");
-        System.out.println("4: Netstat");
-        System.out.println("5: Current Users on the Server");
-        System.out.println("6: Running Processes");
-        System.out.println("0: Exit");
-    }
+                System.out.println("\nsetting up client " + clientId); //log client setup
+                System.out.println("type a number to select a request:"); //prompt for request type
+                System.out.println("1: Date and Time on Server");
+                System.out.println("2: Server Uptime");
+                System.out.println("3: Server Memory Usage");
+                System.out.println("4: Netstat");
+                System.out.println("5: Current Users on The Server");
+                System.out.println("6: Running Processes");
 
-    private static boolean isValidOperation(String input) {
-        try {
-            int op = Integer.parseInt(input);
-            return op >= 1 && op <= 6;
-        } catch (NumberFormatException e) {
-            return false;
+                int requestType = scanner.nextInt(); //read request type
+
+                new Thread(() -> {
+                    try {
+                        Socket socket = new Socket(ipAddress, port); //connect to server
+                        Client client = new Client(socket, clientId, requestType); //initialize client instance
+                        long turnaroundTime = client.runClient(); //execute client and collect turnaround time
+                        turnaroundTimes[clientId - 1] = turnaroundTime; //store turnaround time
+                    } catch (IOException e) {
+                        System.out.println("client " + clientId + " failed to connect: " + e.getMessage()); //log connection error
+                    }
+                }).start();
+            }
+
+            try {
+                Thread.sleep(5000); //wait for all threads to complete
+            } catch (InterruptedException e) {
+                e.printStackTrace(); //handle interruption
+            }
+
+            long totalTurnaroundTime = 0; //initialize total time
+            for (long time : turnaroundTimes) {
+                totalTurnaroundTime += time; //sum turnaround times
+            }
+            double averageTurnaroundTime = (double) totalTurnaroundTime / numClients; //calculate average turnaround time
+
+            System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime + " ms"); //display total time
+            System.out.println("Average Turnaround Time: " + averageTurnaroundTime + " ms"); //display average time
         }
     }
 }
