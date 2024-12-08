@@ -8,17 +8,17 @@ public class MultiClient {
             System.out.println("Please Input IP Address:"); //prompt for server ip
             String ipAddress = scanner.nextLine(); //read server ip
 
-            System.out.println("please input port:"); //prompt for server port
+            System.out.println("Please Input Port:"); //prompt for server port
             int port = scanner.nextInt(); //read server port
 
             int numClients;
             while (true) {
-                System.out.println("Please Input Number of Clients (1, 5, 10, 15, 20, 25, 100)::"); //prompt for number of clients
+                System.out.println("Please Input Number of Clients (1, 5, 10, 15, 20, 25, 100):"); //prompt for number of clients
                 numClients = scanner.nextInt(); //read client count
                 if (numClients >= 1 && numClients <= 100) {
                     break; //exit loop if valid input
                 }
-                System.out.println("invalid number of clients. enter a number between 1 and 100."); //handle invalid input
+                System.out.println("Invalid Number of Clients. Enter a Number Between 1 and 100."); //handle invalid input
             }
 
             long[] turnaroundTimes = new long[numClients]; //array to store turnaround times
@@ -26,7 +26,7 @@ public class MultiClient {
             for (int i = 0; i < numClients; i++) {
                 final int clientId = i + 1; //assign client id
 
-                System.out.println("\nsetting up client " + clientId); //log client setup
+                System.out.println("\nSetting Up Client " + clientId); //log client setup
                 System.out.println("type a number to select a request:"); //prompt for request type
                 System.out.println("1: Date and Time on Server");
                 System.out.println("2: Server Uptime");
@@ -44,7 +44,7 @@ public class MultiClient {
                         long turnaroundTime = client.runClient();
                         turnaroundTimes[clientId - 1] = turnaroundTime;
                     } catch (IOException e) {
-                        System.out.println("client " + clientId + " failed to connect: " + e.getMessage());
+                        System.out.println("Client " + clientId + " Failed To Connect: " + e.getMessage());
                     }
                 });
                 threads[i].start();

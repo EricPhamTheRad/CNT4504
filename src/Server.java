@@ -29,7 +29,7 @@ public class Server {
 
             switch (request) {
                 case 1: response = executeCommand("date"); break; //execute date command
-                case 2: response = executeCommand("pptime"); break; //execute uptime command
+                case 2: response = executeCommand("uptime"); break; //execute uptime command
                 case 3: response = executeCommand("free -m"); break; //execute memory usage command
                 case 4: response = executeCommand("netstat"); break; //execute network stats command
                 case 5: response = executeCommand("who"); break; //execute who command
@@ -45,9 +45,9 @@ public class Server {
             try {
                 clientSocket.close(); //close the client socket
             } catch (IOException e) {
-                System.out.println("error closing client socket: " + e.getMessage()); //log socket close error
+                System.out.println("Error Closing Client Socket: " + e.getMessage()); //log socket close error
             }
-            System.out.println("client disconnected: " + clientSocket.getRemoteSocketAddress()); //log cleint disconnection
+            System.out.println("Client Disconnected: " + clientSocket.getRemoteSocketAddress()); //log cleint disconnection
         }
     }
 

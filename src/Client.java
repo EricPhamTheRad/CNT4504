@@ -18,14 +18,14 @@ public class Client {
         try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            System.out.println("client " + clientId + " connected to server."); //log connection
+            System.out.println("Client " + clientId + " Connected To Server."); //log connection
 
             long startTime = System.currentTimeMillis(); //record start time
 
             out.println(requestType); //send request to server
 
             String response; //variable to store response
-            System.out.println("client " + clientId + " received response:"); //log response reception
+            System.out.println("Client " + clientId + " Received Response:"); //log response reception
             while ((response = in.readLine()) != null) { //read response
                 System.out.println(response); //print response
             }
@@ -34,7 +34,7 @@ public class Client {
             turnaroundTime = endTime - startTime; //calculate turnaround time
 
         } catch (IOException e) {
-            System.out.println("error with client " + clientId + ": " + e.getMessage()); //log error
+            System.out.println("Error With Client " + clientId + ": " + e.getMessage()); //log error
         }
 
         return turnaroundTime; //return turnaround time
