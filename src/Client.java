@@ -2,41 +2,41 @@ import java.io.*;
 import java.net.Socket;
 
 public class Client {
-    private Socket socket; //socket instance for communication
-    private int clientId; //unique client id
-    private int requestType; //type of request
+    private final Socket socket;
+    private final int clientId;
+    private final int requestType;
 
     public Client(Socket socket, int clientId, int requestType) {
-        this.socket = socket; //initialize socket
-        this.clientId = clientId; //initialize client id
-        this.requestType = requestType; //initialize request type
+        this.socket = socket;
+        this.clientId = clientId;
+        this.requestType = requestType;
     }
 
     public long runClient() {
-        long turnaroundTime = 0; //initialize turnaround time
+        long turnaroundTime = 0;
 
         try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-            System.out.println("Client " + clientId + " Connected To Server."); //log connection
+            System.out.println("Client " + clientId + " connected to server.");
 
-            long startTime = System.currentTimeMillis(); //record start time
+            long startTime = System.currentTimeMillis();
 
-            out.println(requestType); //send request to server
+            out.println(requestType);
 
-            String response; //variable to store response
-            System.out.println("Client " + clientId + " Received Response:"); //log response reception
-            while ((response = in.readLine()) != null) { //read response
-                System.out.println(response); //print response
+            String response;
+            System.out.println("Client " + clientId + " received response:");
+            while ((response = in.readLine()) != null) {
+                System.out.println(response);
             }
 
-            long endTime = System.currentTimeMillis(); //record end time
-            turnaroundTime = endTime - startTime; //calculate turnaround time
+            long endTime = System.currentTimeMillis();
+            turnaroundTime = endTime - startTime;
 
         } catch (IOException e) {
-            System.out.println("Error With Client " + clientId + ": " + e.getMessage()); //log error
+            System.err.println("Error with client " + clientId + ": " + e.getMessage());
         }
 
-        return turnaroundTime; //return turnaround time
+        return turnaroundTime;
     }
 }
