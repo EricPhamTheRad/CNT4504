@@ -18,11 +18,11 @@ public class MultiClient {
                 if (numClients >= 1 && numClients <= 100) {
                     break; //exit loop if valid input
                 }
-                System.out.println("invalid number of cleints. enter a number between 1 and 100."); //handle invalid input
+                System.out.println("invalid number of clients. enter a number between 1 and 100."); //handle invalid input
             }
 
             long[] turnaroundTimes = new long[numClients]; //array to store turnaround times
-
+            Thread[] threads = new Thread[numClients];
             for (int i = 0; i < numClients; i++) {
                 final int clientId = i + 1; //assign client id
 
@@ -37,16 +37,17 @@ public class MultiClient {
 
                 int requestType = scanner.nextInt(); //read request type
 
-                new Thread(() -> {
+                threads[i] = new Thread(() -> {
                     try {
-                        Socket socket = new Socket(ipAddress, port); //connect to server
-                        Client client = new Client(socket, clientId, requestType); //initialize client instance
-                        long turnaroundTime = client.runClient(); //execute client and collect turnaround time
-                        turnaroundTimes[clientId - 1] = turnaroundTime; //store turnaround time
+                        Socket socket = new Socket(ipAddress, port);
+                        Client client = new Client(socket, clientId, requestType);
+                        long turnaroundTime = client.runClient();
+                        turnaroundTimes[clientId - 1] = turnaroundTime;
                     } catch (IOException e) {
-                        System.out.println("client " + clientId + " failed to connect: " + e.getMessage()); //log connection error
+                        System.out.println("client " + clientId + " failed to connect: " + e.getMessage());
                     }
-                }).start();
+                });
+                threads[i].start();
             }
 
             try {
