@@ -1,16 +1,16 @@
-
 import java.io.*;
 import java.net.*;
-
 import com.pi4j.Pi4J;
 import com.pi4j.io.exception.IOException;
-
 import com.pi4j.io.spi.SpiBus;
 import com.pi4j.io.spi.SpiChipSelect;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
 
-
+/**
+ * Client code for Raspberry Pi
+ * Handles communication with server and setting up SPI
+ */
 public class Client {
     public static void main(String[] args) throws InterruptedException {
         //use to terminate program
@@ -24,11 +24,12 @@ public class Client {
                 )
                 .build();
         //Selects Pin 8 for the Chip select
-        SpiChipSelect chipSelect = SpiChipSelect.CS_0;
+        SpiChipSelect chipSelectLIS3DH = SpiChipSelect.CS_1;
         //Creates buss for the SPI
         SpiBus spiBus = SpiBus.BUS_0;
         //Creates the object to handles SPI communication and reading of acceleration from LIS3DH
-        LIS3DH test = new LIS3DH(pi4j, spiBus, chipSelect);
+        LIS3DH test = new LIS3DH(pi4j, spiBus, chipSelectLIS3DH);
+
         //To Do: Set up class and object for SPI communication for ADC value from MCP3008
 
         //Main loop, should exit when
@@ -36,13 +37,13 @@ public class Client {
             //try to access server at IP and socket
             System.out.println("Attempting to Connect");
             //System.out.println("10.253.5.167");
-            System.out.println("192.168.1.74");
+            System.out.println("10.253.5.167");
             //Currently have to update IP address uses if change location or the router reassigns
             //For Final version use Braindrip's main computer static IP address.
-            try (Socket socket = new Socket("192.168.1.74", 2222)) {
+            try (Socket socket = new Socket("10.253.5.167", 2222)) {
                 //Sets up reading the socket if successful
                 System.out.println("Connected");
-                //
+                //Wrapper around the socket input to make reading and writing easier
                 BufferedReader receive = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
                 //code to terminate program remotely un comment to activate
@@ -67,15 +68,10 @@ public class Client {
                         */
                         //Polls data, currently only prints to client terminal for testing function
                         values = test.readAccelerometerData();
-
-                        //Send dummy data
-                        writer.printf("X: %.2f, Y: %.2f, Z: %.2f%n",values[0],values[1],values[2]);
+                        //Send data to server in a readable way, temporary
+                        writer.printf("%.2f, %.2f, %.2f%n",values[0],values[1],values[2]);
                     }
-                    //slow loop for readability
-                    //values = test.readAccelerometerData();
-
-                    //Send dummy data
-                    //writer.printf("X: %.2f, Y: %.2f, Z: %.2f%n", values[0],values[1], values[2]);
+                    //Slows loop
                     Thread.sleep(1000);
                 }
                 //closes client

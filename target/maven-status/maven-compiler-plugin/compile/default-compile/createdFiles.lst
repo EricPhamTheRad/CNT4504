@@ -4,3 +4,4 @@ Loop.class
 ip.class
 Server.class
 TerminalWriter.class
+FileHandler.class

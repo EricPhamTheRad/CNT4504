@@ -16,6 +16,7 @@ import com.pi4j.io.spi.SpiMode;
 public class LIS3DH {
 
     // LIS3DH register addresses and constants
+    //Register numbers are commonly in Hexadecimal
     private static final byte CTRL_REG1 = (byte) 0x20; // Control Register 1
     private static final byte OUT_X_L = (byte) 0x28;  // Output X low register
     private static final byte OUT_X_H = (byte) 0x29;  // Output X high register
@@ -24,6 +25,10 @@ public class LIS3DH {
     private static final byte OUT_Z_L = (byte) 0x2C;  // Output Z low register
     private static final byte OUT_Z_H = (byte) 0x2D;  // Output Z high register
 
+    private Spi spi; //SPI object, contains SPI configuration and methods for communication
+    private final SpiChipSelect chipSelect; //Which pin is selected on the PI GPIO
+    private final SpiBus spiBus; //Data bus for spi, stores received and sending data
+    private final Context pi4j; //Contains information of the Raspberry Pi needed for SPI
     /**
      * Constructor for the LIS3DH object to use SPI
      * @param pi4j object contains information about the Raspberry Pi board need for SPI
@@ -62,7 +67,7 @@ public class LIS3DH {
     /**
      * Configures the registers of the LIS3DH
      * Control Register 1 contains 7 bits, each bit controls a function of the LIS3DH
-     * 0x57 is equivalent to 1 1 1 0 0 1 0 0
+     * 0x57 is equivalent to 1110 0100
      * The first three bits enable the X, Y, Z axis of the LIS3DH
      * The fourth bit enables low power mode, this is disabled
      * The last bits control the power mode and the output data rate, normal and 50Hz were selected
@@ -104,6 +109,7 @@ public class LIS3DH {
 
     private short readAxisData(byte lowRegister, byte highRegister) throws IOException {
         //The register address is a 7-bit number, the 7th bit (the first bit is index as 0) is set to 1
+        //Ie 0x20 is 0010 0000, | 0x80 changes it to 1010 0000
         //to enable reading, a dummy byte is set to allow for data is set
         byte[] lowAddress = new byte[]{ (byte) (lowRegister | 0x80), (byte)0x00 };
         byte[] highAddress = new byte[]{ (byte) (highRegister | 0x80), (byte)0x00 };
@@ -121,29 +127,41 @@ public class LIS3DH {
         //lowResult contains the lowest bits and is concatenated to the end
         //Ex 1111 1111 0000 0000 + 0000 0000 0101 0101 -> 1111 1111 0101 0101
         // the & 0xFF is a bit mask, to remove the starting 1s
-        //Ie the results may come in as 1111 1111 1010 1010, the 8 bits in the beginning are not data ,
+        //Ie the results may come in as 1111 1111 1010 1010, the 8 bits in the beginning are not data.
         return (short) ((highResult[1] & 0xFF) << 8 | (lowResult[1] & 0xFF));
     }
+
+    /**
+     * Checks if the data is ready to be read, current not working
+     * @return a true if the data is ready to be read, false if not
+     */
     public boolean isDataReady() {
+        //sets the 7th bit to 1 to enable reading data, 0x00 is dummy data
         byte[] statusRegister = new byte[]{(byte) ( 0x27 | 0x80), 0x00}; // 0x80 for read operation
-        byte[] response = new byte[1];
+        byte[] response = new byte[1]; //received data
+        //Reads status register of the LIS3DH
         this.spi.transfer(statusRegister, response); // Perform the SPI transfer
         System.out.println("Status: "+Integer.toBinaryString(response[0]));
         return (response[0] & 0x08) != 0;  // Check if data-ready bit (bit 3) is set
     }
 
+    /**
+     * Some ICs contain a register with a non changing value that can be used as an ID
+     * Reading this can help to check if SPI is correctly set up
+     * Not in this case, I got data reading before this working
+     */
     public void who() {
-        byte[] sendBuffer = new byte[] { (byte) (0x0F |  0x80), (byte) 0x00 };
-        byte[] receiveBuffer = new byte[1];
-        spi.transfer(sendBuffer, receiveBuffer);
-        byte whoAmI = receiveBuffer[0];
+        //Who am I registering is stored in the 0x0F register, corresponds to 15 or 0000 1111
+        //Sets read bit to read
+        byte[] send = new byte[] { (byte) (0x0F |  0x80), (byte) 0x00 };
+        byte[] receive = new byte[1]; //received byte
+        //Reads data from LIS3DH
+        spi.transfer(send, receive);
+        //Retrieve received value
+        byte whoAmI = receive[0];
+        //Prints content
         System.out.println("Who Am I Response: " + (whoAmI & 0xFF));
 
     }
-
-    private Spi spi;
-    private final SpiChipSelect chipSelect;
-    private final SpiBus spiBus;
-    private final Context pi4j;
 }
 

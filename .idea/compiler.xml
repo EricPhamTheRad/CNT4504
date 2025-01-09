@@ -7,9 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="BrainDrip" />
+        <module name="3" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="BrainDrip" target="17" />
       <module name="untitled" target="17" />
     </bytecodeTargetLevel>
   </component>

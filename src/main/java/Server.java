@@ -1,12 +1,27 @@
 import java.io.*;
 import java.net.*;
-// For reading user input
+import java.util.Date;
+import java.text.SimpleDateFormat;
+/**
+ * This program is the application of the tension sensing system
+ * Handles GUI through a future class file, communication with Raspberry Pi clients
+ */
+
 public class Server {
-    public static void main(String[] args) throws UnknownHostException {
-        //Create socket for server at port 2222
-        System.out.println(InetAddress.getLocalHost());
+    /**
+     * Main function of the program
+     * @param args if command line arguments are used in the future they will be stored here
+     */
+    public static void main(String[] args) {
+
+        //System.out.println(InetAddress.getLocalHost());
+        //Flag for exiting main loop
         boolean exit = false;
+        //String holds data received
         String data;
+        FileHandler filehandler = new FileHandler();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+        //Create socket for server at port 2222
         System.out.println("Server is listening on port 2222");
         try (ServerSocket serverSocket = new ServerSocket(2222)) {
             //waits for client to connect
@@ -31,18 +46,18 @@ public class Server {
 
             //main while loop
             while(!exit) {
-                //Currently uses manual typing to request data
-                //TODO: uses loop to send request and wait for data to be receive
+                //Checks if the client closed unexpected
                 if(socket.isClosed()){
                     System.out.println("Socket Closed");
                 }
-                //wait 1 second
+                //Request data from Raspberry Pi, in future spin off to separate class
                 System.out.println("requesting data");
                 writer.println("requesting");
+                //wait 1 second
                 Thread.sleep(1000);
                 //Read terminal for string data
                 data = receive.readLine();
-                //checks if Client closed
+                //checks if closed on command closed
                 if(data.equals("closed")){
                     exit = true;
                 }
@@ -52,6 +67,7 @@ public class Server {
                 else {
                     System.out.print("Data received: ");
                     System.out.println(data);
+                    filehandler.writeResults(dateFormat.format(new Date())+","+data);
                 }
             }
 
